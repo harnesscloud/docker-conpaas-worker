@@ -17,5 +17,5 @@ the container is executed.
            --privileged=true -i -t harness-container
            
 
-In order to use infiniband, the container must run with privileged access.
+In order to use infiniband, the container must be run with privileged access.
 
