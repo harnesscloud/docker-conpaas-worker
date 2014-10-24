@@ -59,15 +59,7 @@ function cecho() {
   echo -e "\033[0m"
 }
 
-# Section: variables from configuration file
-
-# The name and size of the image file that will be generated.
-FILENAME=conpaas.img
-FILESIZE=3072 #MB
-
-# The Debian distribution that you would like to have installed (we recommend squeeze).
-DEBIAN_DIST=wheezy
-DEBIAN_MIRROR=http://ftp.fr.debian.org/debian/
+UBUNTU_DIST=trusty
 
 # The architecture and kernel version for the OS that will be installed (please make
 # sure to modify the kernel version name accordingly if you modify the architecture).
@@ -107,7 +99,7 @@ function cecho() {
 echo "root:contrail" | chpasswd
 
 # fix apt sources
-sed --in-place 's/main/main contrib non-free/' /etc/apt/sources.list
+#sed --in-place 's/main/main contrib non-free/' /etc/apt/sources.list
 
 export DEBIAN_FRONTEND=noninteractive
 
@@ -119,7 +111,7 @@ apt-get -q -y install curl
 
 
 # install dependencies
-apt-get -f -y update
+apt-get -y update
 # pre-accept sun-java6 licence
 echo "debconf shared/accepted-sun-dlj-v1-1 boolean true" | debconf-set-selections
 DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends --no-upgrade \
@@ -136,15 +128,15 @@ apt-get clean
 
 # create directory structure
 echo > /var/log/cpsagent.log
-mkdir /etc/cpsagent/
-mkdir /var/tmp/cpsagent/
-mkdir /var/run/cpsagent/
-mkdir /var/cache/cpsagent/
+mkdir -p /etc/cpsagent/
+mkdir -p /var/tmp/cpsagent/
+mkdir -p /var/run/cpsagent/
+mkdir -p /var/cache/cpsagent/
 echo > /var/log/cpsmanager.log
-mkdir /etc/cpsmanager/
-mkdir /var/tmp/cpsmanager/
-mkdir /var/run/cpsmanager/
-mkdir /var/cache/cpsmanager/
+mkdir -p /etc/cpsmanager/
+mkdir -p /var/tmp/cpsmanager/
+mkdir -p /var/run/cpsmanager/
+mkdir -p /var/cache/cpsmanager/
 
 EOF
 
@@ -152,16 +144,13 @@ EOF
 
 cat <<EOF >> $ROOT_DIR/conpaas_install
 cecho "===== add dotdeb repo for php fpm ====="
-# add dotdeb repo for php fpm
-echo "deb http://packages.dotdeb.org $DEBIAN_DIST all" >> /etc/apt/sources.list
-wget -O - http://www.dotdeb.org/dotdeb.gpg 2>/dev/null | apt-key add -
-apt-get -f -y update
-apt-get -f -y --no-install-recommends --no-upgrade install php5-fpm php5-curl \
+apt-get -y update
+apt-get -y --no-install-recommends --no-upgrade install php5-fpm php5-curl \
         php5-mcrypt php5-mysql php5-odbc php5-pgsql php5-sqlite php5-sybase php5-xmlrpc \
         php5-xsl php5-adodb php5-memcache php5-gd nginx git tomcat6-user memcached
 
 # For autoscaling
-apt-get -f -y --no-install-recommends --no-upgrade install libatlas-base-dev libatlas3gf-base \
+apt-get -y --no-install-recommends --no-upgrade install libatlas-base-dev libatlas3gf-base \
     python-dev python-scipy python-setuptools python-simplejson gfortran g++
 easy_install numpy
 easy_install -U numpy
@@ -174,8 +163,8 @@ update-rc.d memcached disable
 update-rc.d nginx disable
 
 # remove dotdeb repo
-sed --in-place 's%deb http://packages.dotdeb.org $DEBIAN_DIST all%%' /etc/apt/sources.list
-apt-get -f -y update
+sed --in-place 's%deb http://packages.dotdeb.org wheezy all%%' /etc/apt/sources.list
+apt-get -y update
 
 # remove cached .debs from /var/cache/apt/archives to save disk space
 apt-get clean
@@ -188,7 +177,7 @@ GIT_SERVICE="true"
 cat <<EOF >> $ROOT_DIR/conpaas_install
 cecho "===== install GIT ====="
 # add git user
-useradd git --shell /usr/bin/git-shell --create-home -k /dev/null
+(useradd git --shell /usr/bin/git-shell --create-home -k /dev/null) || true
 # create ~git/.ssh and authorized_keys
 install -d -m 700 --owner=git --group=git /home/git/.ssh
 install -m 600 --owner=git --group=git /dev/null ~git/.ssh/authorized_keys
@@ -209,204 +198,150 @@ fi
 
 cat <<EOF >> $ROOT_DIR/conpaas_install
 
-apt-get -f -y update
-DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends --no-upgrade install \
-		psmisc libaio1 libdbi-perl libdbd-mysql-perl mysql-client rsync python-mysqldb make
+#apt-get -y update
+#apt-get install libssl0.9.8
+#DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends --no-upgrade install \
+#		psmisc libaio1 libdbi-perl libdbd-mysql-perl mysql-client rsync python-mysqldb make
 
-if [ $DEBIAN_DIST == "squeeze" ]
-then
-    cd /root/
-#    wget https://launchpad.net/galera/2.x/23.2.4/+download/galera-23.2.4-amd64.deb 2>/dev/null
-#    dpkg -i galera-23.2.4-amd64.deb
-
-    wget https://launchpad.net/galera/2.x/25.2.8/+download/galera-25.2.8-$ARCH.deb 2>/dev/null
-    dpkg -i galera-25.2.8-$ARCH.deb
-
-#    wget https://launchpad.net/codership-mysql/5.5/5.5.29-23.7.3/+download/mysql-server-wsrep-5.5.29-23.7.3-amd64.deb 2>/dev/null
-#    dpkg -i mysql-server-wsrep-5.5.29-23.7.3-amd64.deb
-
-    wget https://launchpad.net/codership-mysql/5.5/5.5.34-25.9/+download/mysql-server-wsrep-5.5.34-25.9-$ARCH.deb 2>/dev/null
-    dpkg -i mysql-server-wsrep-5.5.34-25.9-$ARCH.deb
-
-    rm -f mysql-server-wsrep-5.5.34-25.9-$ARCH.deb
-    rm -f galera-25.2.8-$ARCH.deb
-    
-    ## Fixing a bug in MySQL Galera (actually fixed in MySQL Galera 5.5.31-23.7.5 in June 2013)
-#    sed 's.>>/dev/stderr.>\&2.' /usr/bin/wsrep_sst_common
-
-elif [ $DEBIAN_DIST == "wheezy" ]
-then
-    cd /root/
-#    # Galera version 3.x
-#    wget https://launchpad.net/galera/3.x/25.3.1/+download/galera-25.3.1-$ARCH.deb 2>/dev/null
-#    dpkg -i galera-25.3.1-$ARCH.deb
-
-    # Pre-build package depends on libssl0.9.8 whereas wheezy ships with libssl1.0.0
-    # Building and installing from source to link with libssl1.0.0
-    DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends --no-upgrade install \
-        scons libssl-dev libboost-dev libboost-program-options-dev check
-    wget https://launchpad.net/galera/3.x/25.3.1/+download/galera-25.3.1-src.tar.gz 2> /dev/null
-    tar -xaf galera-25.3.1-src.tar.gz
-    cd galera-25.3.1-src
-    scons /
-    cd ..
-    rm -rf galera-25.3.1-src
-
-#    # Galera version 2.x
-#    DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends --no-upgrade install libssl0.9.8
-#    wget https://launchpad.net/galera/2.x/25.2.8/+download/galera-25.2.8-$ARCH.deb 2> /dev/null
-#    dpkg -i galera-25.2.8-$ARCH.deb
-    
-    wget https://launchpad.net/codership-mysql/5.5/5.5.34-25.9/+download/mysql-server-wsrep-5.5.34-25.9-$ARCH.deb 2>/dev/null
-    dpkg -i mysql-server-wsrep-5.5.34-25.9-$ARCH.deb
-
-    rm -f mysql-server-wsrep-5.5.34-25.9-$ARCH.deb
-    rm -f galera-25.3.1-src.tar.gz
-
-else
-    echo "ERROR: unknown Debian distribution '$DEBIAN_DIST': cannot select correct MySQL Galera packages."
-    exit 1
-fi
+#wget https://launchpad.net/galera/3.x/25.3.1/+download/galera-25.3.1-amd64.deb
+#dpkg -i galera-25.3.1-amd64.deb
+#wget https://launchpad.net/codership-mysql/5.6/5.6.16-25.5/+download/mysql-server-wsrep-5.6.16-25.5-amd64.deb
+#dpkg -i mysql-server-wsrep-5.6.16-25.5-amd64.deb
 
 
-# Added more wait time before deciding whether the mysql daemon has failed to start (idem for stopping)
-sed -i 's/1 2 3 4 5 6.*;/\$(seq 60);/' /etc/init.d/mysql
+## Added more wait time before deciding whether the mysql daemon has failed to start (idem for stopping)
+#sed -i 's/1 2 3 4 5 6.*;/\$(seq 60);/' /etc/init.d/mysql
 
 
-# Install Galera Load Balancer (glb)
+## Install Galera Load Balancer (glb)
 
-#installation of prerequisites
-apt-get -y install git autoconf libtool
-#download the lastest version from git-hub  
-git clone https://github.com/codership/glb
-#configuration build and installation  
-cd glb
-./bootstrap.sh
-./configure
-make
-make install
-cp -a ./files/glbd.sh /etc/init.d/glbd
-cp -a ./files/glbd.cfg /etc/default/glbd
-# using default listen port 8010
-sed -i 's/#LISTEN_ADDR/LISTEN_ADDR/' /etc/default/glbd
-# using default listen port 8011
-## wait 1 second after EOF to close nc
-sed -i 's/#CONTROL_ADDR/CONTROL_ADDR/' /etc/default/glbd
-sed -i 's/nc \$CONTROL_IP/nc -q 1 \$CONTROL_IP/' /etc/init.d/glbd
-cd ..
-rm -fr glb-\${glb_version} glb-\${glb_version}.tar.gz
+##installation of prerequisites
+#apt-get -y install git autoconf libtool
+##download the lastest version from git-hub  
+#rm -rf glb
+#git clone https://github.com/codership/glb
+##configuration build and installation  
+#cd glb
+#./bootstrap.sh
+#./configure
+#make
+#make install
+#cp -a ./files/glbd.sh /etc/init.d/glbd
+#cp -a ./files/glbd.cfg /etc/default/glbd
+## using default listen port 8010
+#sed -i 's/#LISTEN_ADDR/LISTEN_ADDR/' /etc/default/glbd
+## using default listen port 8011
+### wait 1 second after EOF to close nc
+#sed -i 's/#CONTROL_ADDR/CONTROL_ADDR/' /etc/default/glbd
+#sed -i 's/nc \$CONTROL_IP/nc -q 1 \$CONTROL_IP/' /etc/init.d/glbd
+#cd ..
+#rm -fr glb-\${glb_version} glb-\${glb_version}.tar.gz
 
 
 EOF
 # Section: 503-condor
 
 cat <<EOF >> $ROOT_DIR/conpaas_install
-cecho "===== install packages required by HTCondor ====="
-# avoid warning: W: GPG error: http://mozilla.debian.net squeeze-backports Release: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 85A3D26506C4AE2A 
-#apt-get install debian-keyring
-wget -O - -q http://mozilla.debian.net/archive.asc | apt-key add -
-# avoid warning: W: GPG error: http://dl.google.com stable Release: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY A040830F7FAC5991 
-wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+#cecho "===== install packages required by HTCondor ====="
+## avoid warning: W error: http://mozilla.debian.net squeeze-backports Release: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 85A3D26506C4AE2A 
+##apt-get install debian-keyring
+#wget -O - -q http://mozilla.debian.net/archive.asc | apt-key add -
+## avoid warning: W: GPG error: http://dl.google.com stable Release: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY A040830F7FAC5991 
+#wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+#wget -qO - http://research.cs.wisc.edu/htcondor/debian/HTCondor-Release.gpg.key | sudo apt-key add -
+## If things go wrong, you may want to read  http://research.cs.wisc.edu/htcondor/debian/
+## 
+## added [arch=amd64 trusted=yes] to avoid authentication warning
+#echo "deb [arch=amd64 trusted=yes] http://research.cs.wisc.edu/htcondor/debian/stable/ wheezy contrib" >> /etc/apt/sources.list
+#apt-get update
+#if [ $UBUNTU_DIST == "squeeze" ]
+#then
+#    DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends --no-upgrade \
+#        install sun-java6-jdk ant condor sudo xvfb
+#elif [ $UBUNTU_DIST == "trusty" ]
+#then
+#    DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends --no-upgrade \
+#        install openjdk-7-jre-headless ant condor sudo xvfb
+#else
+#    echo "Error: unknown Debian distribution '$UBUNTU_DIST': cannot select correct Condor packages."
+#    exit 1
+#fi
 
-# If things go wrong, you may want to read  http://research.cs.wisc.edu/htcondor/debian/
-# 
-# added [arch=amd64 trusted=yes] to avoid authentication warning
-echo "deb [arch=amd64 trusted=yes] http://research.cs.wisc.edu/htcondor/debian/stable/ $DEBIAN_DIST contrib" >> /etc/apt/sources.list
-apt-get update
-if [ $DEBIAN_DIST == "squeeze" ]
-then
-    DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends --no-upgrade \
-        install sun-java6-jdk ant condor sudo xvfb
-elif [ $DEBIAN_DIST == "wheezy" ]
-then
-    DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --no-install-recommends --no-upgrade \
-        install openjdk-7-jre-headless ant condor sudo xvfb
-else
-    echo "Error: unknown Debian distribution '$DEBIAN_DIST': cannot select correct Condor packages."
-    exit 1
-fi
+## next 12 lines moved here from conpaas-services/scripts/manager/htc-manager-start
+#apt-get update -y 
+#echo ==== python-setuptools 
+#apt-get install python-setuptools -y 
+#sleep 2
+#echo ==== pip  
+#easy_install -U distribute
+#easy_install pip 
+#sleep 2
+#echo PATH=$PATH 
+#export PATH=$PATH:/usr/local/bin
+#echo PATH=$PATH 
+#echo ==== xmltodict  
+#pip install xmltodict 
 
-# next 12 lines moved here from conpaas-services/scripts/manager/htc-manager-start
-apt-get update -y 
-echo ==== python-setuptools 
-apt-get install python-setuptools -y 
-sleep 2
-echo ==== pip  
-easy_install -U distribute
-easy_install pip 
-sleep 2
-echo PATH=$PATH 
-export PATH=$PATH:/usr/local/bin
-echo PATH=$PATH 
-echo ==== xmltodict  
-pip install xmltodict 
-
-echo ===== check if HTCondor is running =====
-ps -ef | grep condor
-echo ===== stop condor =====
-/etc/init.d/condor stop
-echo ===== 
-
-# remove cached .debs from /var/cache/apt/archives to save disk space
-apt-get clean
+## remove cached .debs from /var/cache/apt/archives to save disk space
+#apt-get clean
 EOF
 
 # Section: 504-selenium
 
 cat <<EOF >> $ROOT_DIR/conpaas_install
-cecho "===== install SELENIUM ====="
+#cecho "===== install SELENIUM ====="
 
-if [ $DEBIAN_DIST == "squeeze" ]
-then
-    # recent versions of iceweasel and chrome
-    echo "deb http://backports.debian.org/debian-backports $DEBIAN_DIST-backports main" >> /etc/apt/sources.list
-    echo "deb http://mozilla.debian.net/ $DEBIAN_DIST-backports iceweasel-esr" >> /etc/apt/sources.list
+#if [ $UBUNTU_DIST == "squeeze" ]
+#then
+#    # recent versions of iceweasel and chrome
+#    echo "deb http://backports.debian.org/debian-backports $UBUNTU_DIST-backports main" >> /etc/apt/sources.list
+#    echo "deb http://mozilla.debian.net/ $UBUNTU_DIST-backports iceweasel-esr" >> /etc/apt/sources.list
 
-    apt-get -f -y update
-    apt-get -f -y --force-yes install -t $DEBIAN_DIST-backports iceweasel
-    apt-get -f -y --force-yes install xvfb xinit chromium-browser sun-java6-jdk
-elif [ $DEBIAN_DIST == "wheezy" ]
-then
-    apt-get -f -y update
-    apt-get -f -y --force-yes install iceweasel xvfb xinit chromium-browser openjdk-7-jre-headless
-else
-    echo "Error: unknown Debian distribution '$DEBIAN_DIST': cannot select correct Selenium packages."
-    exit 1
-fi
+#    apt-get -y update
+#    apt-get -y --force-yes install -t $UBUNTU_DIST-backports iceweasel
+#    apt-get -y --force-yes install xvfb xinit chromium-browser sun-java6-jdk
+#elif [ $UBUNTU_DIST == "trusty" ]
+#then
+#    apt-get -y update
+#    apt-get -y --force-yes install iceweasel xvfb xinit chromium-browser openjdk-7-jre-headless
+#else
+#    echo "Error: unknown Debian distribution '$UBUNTU_DIST': cannot select correct Selenium packages."
+#    exit 1
+#fi
 
 EOF
 
 # Section: 505-hadoop
 
 cat <<EOF >> $ROOT_DIR/conpaas_install
-cecho "===== install cloudera repo for hadoop ====="
-# add cloudera repo for hadoop
-if [ "$DEBIAN_DIST" == "wheezy" ]
-then
-  hadoop_dist="squeeze"
-else
-  hadoop_dist="$DEBIAN_DIST"
-fi
-echo "deb http://archive.cloudera.com/debian \${hadoop_dist}-cdh3 contrib" >> /etc/apt/sources.list
-wget -O - http://archive.cloudera.com/debian/archive.key 2>/dev/null | apt-key add -
-apt-get -f -y update
-apt-get -f -y --no-install-recommends --no-upgrade install \
-  hadoop-0.20 hadoop-0.20-namenode hadoop-0.20-datanode \
-  hadoop-0.20-secondarynamenode hadoop-0.20-jobtracker  \
-  hadoop-0.20-tasktracker hadoop-pig hue-common  hue-filebrowser \
-  hue-jobbrowser hue-jobsub hue-plugins hue-server dnsutils
-update-rc.d hadoop-0.20-namenode disable
-update-rc.d hadoop-0.20-datanode disable
-update-rc.d hadoop-0.20-secondarynamenode disable
-update-rc.d hadoop-0.20-jobtracker disable
-update-rc.d hadoop-0.20-tasktracker disable
-update-rc.d hue disable
-# create a default config dir
-mkdir -p /etc/hadoop-0.20/conf.contrail
-update-alternatives --install /etc/hadoop-0.20/conf hadoop-0.20-conf /etc/hadoop-0.20/conf.contrail 99
-# remove cloudera repo
-sed --in-place "s%deb http://archive.cloudera.com/debian \${hadoop_dist}-cdh3 contrib%%" /etc/apt/sources.list
-apt-get -f -y update
+#cecho "===== install cloudera repo for hadoop ====="
+## add cloudera repo for hadoop
+#if [ "$UBUNTU_DIST" == "trusty" ]
+#then
+#  hadoop_dist="squeeze"
+#else
+#  hadoop_dist="$UBUNTU_DIST"
+#fi
+#echo "deb http://archive.cloudera.com/debian \${hadoop_dist}-cdh3 contrib" >> /etc/apt/sources.list
+#wget -O - http://archive.cloudera.com/debian/archive.key 2>/dev/null | apt-key add -
+#apt-get -y update
+#apt-get -y --no-install-recommends --no-upgrade install \
+#  hadoop-0.20 hadoop-0.20-namenode hadoop-0.20-datanode \
+#  hadoop-0.20-secondarynamenode hadoop-0.20-jobtracker  \
+#  hadoop-0.20-tasktracker hadoop-pig hue-common  hue-filebrowser \
+#  hue-jobbrowser hue-jobsub hue-plugins hue-server dnsutils
+#update-rc.d hadoop-0.20-namenode disable
+#update-rc.d hadoop-0.20-datanode disable
+#update-rc.d hadoop-0.20-secondarynamenode disable
+#update-rc.d hadoop-0.20-jobtracker disable
+#update-rc.d hadoop-0.20-tasktracker disable
+#update-rc.d hue disable
+## create a default config dir
+#mkdir -p /etc/hadoop-0.20/conf.contrail
+#update-alternatives --install /etc/hadoop-0.20/conf hadoop-0.20-conf /etc/hadoop-0.20/conf.contrail 99
+## remove cloudera repo
+#sed --in-place "s%deb http://archive.cloudera.com/debian \${hadoop_dist}-cdh3 contrib%%" /etc/apt/sources.list
+#apt-get -y update
 
 
 EOF
@@ -414,44 +349,44 @@ EOF
 # Section: 506-scalaris
 
 cat <<EOF >> $ROOT_DIR/conpaas_install
-cecho "===== install scalaris repo ====="
+#cecho "===== install scalaris repo ====="
 # add scalaris repo
-echo "deb http://download.opensuse.org/repositories/home:/scalaris/Debian_6.0 /" >> /etc/apt/sources.list
-wget -O - http://download.opensuse.org/repositories/home:/scalaris/Debian_6.0/Release.key 2>/dev/null | apt-key add -
-apt-get -f -y update
-apt-get -f -y --no-install-recommends --no-upgrade install scalaris screen erlang
-update-rc.d scalaris disable
-# remove scalaris repo
-sed --in-place 's%deb http://download.opensuse.org/repositories/home:/scalaris/Debian_6.0 /%%' /etc/apt/sources.list
-apt-get -f -y update
+#echo "deb http://download.opensuse.org/repositories/home:/scalaris/Debian_6.0 /" >> /etc/apt/sources.list
+#wget -O - http://download.opensuse.org/repositories/home:/scalaris/Debian_6.0/Release.key 2>/dev/null | apt-key add -
+#apt-get -y update
+#apt-get -y --no-install-recommends --no-upgrade install scalaris screen erlang
+#update-rc.d scalaris disable
+## remove scalaris repo
+#sed --in-place 's%deb http://download.opensuse.org/repositories/home:/scalaris/Debian_6.0 /%%' /etc/apt/sources.list
+#apt-get -y update
 
 EOF
 
 # Section: 507-xtreemfs
 
 cat <<EOF >> $ROOT_DIR/conpaas_install
-cecho "===== install xtreemfs repo ====="
-# add xtreemfs repo
-if [ "$DEBIAN_DIST" == "squeeze" ]
-then
-    echo "deb http://download.opensuse.org/repositories/home:/xtreemfs:/unstable/Debian_6.0 /" >> /etc/apt/sources.list
-    wget -O - http://download.opensuse.org/repositories/home:/xtreemfs:/unstable/Debian_6.0/Release.key 2>/dev/null | apt-key add -
-elif [ "$DEBIAN_DIST" == "wheezy" ]
-then
-    echo "deb http://download.opensuse.org/repositories/home:/xtreemfs:/unstable/Debian_7.0 /" >> /etc/apt/sources.list
-    wget -O - http://download.opensuse.org/repositories/home:/xtreemfs:/unstable/Debian_7.0/Release.key 2>/dev/null | apt-key add -
-else
-    echo "ERROR: unknown Debian distribution '$DEBIAN_DIST'."
-    exit 1
-fi
-apt-get -f -y update
-apt-get -f -y --no-install-recommends --no-upgrade install xtreemfs-server xtreemfs-client xtreemfs-tools
-update-rc.d xtreemfs-osd disable
-update-rc.d xtreemfs-mrc disable
-update-rc.d xtreemfs-dir disable
-# remove xtreemfs repo
-sed --in-place 's%deb http://download.opensuse.org/repositories/home:/xtreemfs:/unstable/Debian_..0 /%%' /etc/apt/sources.list
-apt-get -f -y update
+#cecho "===== install xtreemfs repo ====="
+## add xtreemfs repo
+#if [ "$UBUNTU_DIST" == "squeeze" ]
+#then
+#    echo "deb http://download.opensuse.org/repositories/home:/xtreemfs:/unstable/Debian_6.0 /" >> /etc/apt/sources.list
+#    wget -O - http://download.opensuse.org/repositories/home:/xtreemfs:/unstable/Debian_6.0/Release.key 2>/dev/null | apt-key add -
+#elif [ "$UBUNTU_DIST" == "trusty" ]
+#then
+#    echo "deb http://download.opensuse.org/repositories/home:/xtreemfs:/unstable/Debian_7.0 /" >> /etc/apt/sources.list
+#    wget -O - http://download.opensuse.org/repositories/home:/xtreemfs:/unstable/Debian_7.0/Release.key 2>/dev/null | apt-key add -
+#else
+#    echo "ERROR: unknown Debian distribution '$UBUNTU_DIST'."
+#    exit 1
+#fi
+#apt-get -y update
+#apt-get -y --no-install-recommends --no-upgrade install xtreemfs-server xtreemfs-client xtreemfs-tools
+#update-rc.d xtreemfs-osd disable
+#update-rc.d xtreemfs-mrc disable
+#update-rc.d xtreemfs-dir disable
+## remove xtreemfs repo
+#sed --in-place 's%deb http://download.opensuse.org/repositories/home:/xtreemfs:/unstable/Debian_..0 /%%' /etc/apt/sources.list
+#apt-get -y update
 
 EOF
 
@@ -491,12 +426,12 @@ php_pkgs = ['php5-fpm', 'php5-curl', 'php5-mcrypt', 'php5-mysql', 'php5-odbc',
 
 galera_pkgs = ['galera', 'mysql-server-wsrep', 'python-mysqldb', 'rsync']
 
-if "$DEBIAN_DIST" == "squeeze":
+if "$UBUNTU_DIST" == "squeeze":
     condor_pkgs = ['sun-java6-jdk', 'ant', 'condor', 'sudo', 'xvfb']
 else:
     condor_pkgs = ['openjdk-7-jre-headless', 'ant', 'condor', 'sudo', 'xvfb']
 
-if "$DEBIAN_DIST" == "squeeze":
+if "$UBUNTU_DIST" == "squeeze":
     selenium_pkgs = ['iceweasel', 'xvfb', 'xinit', 'chromium-browser','sun-java6-jdk']
 else:
     selenium_pkgs = ['iceweasel', 'xvfb', 'xinit', 'chromium-browser','openjdk-7-jre-headless']
@@ -697,7 +632,7 @@ RM_SCRIPT_ARGS=' --php --galera --condor --selenium --hadoop --scalaris --xtreem
 # Section: 996-tail
 
 cat <<EOF >> $ROOT_DIR/conpaas_install
-apt-get -f -y clean
+apt-get -y clean
 exit 0
 EOF
 
@@ -846,177 +781,6 @@ echo "------END SSH HOST KEY FINGERPRINTS------" | $logger
 exit 0
 EOF
 
-# Section: 999-resize-image
-
-conpaas_resize=$(mktemp)
-
-cat <<"EOF" > $conpaas_resize
-#!/bin/bash
-
-# Customizable
-DEFAULT_FREE_SPACE=256 #MB
-
-
-# Function for displaying highlighted messages.
-function cecho() {
-  echo -en "\033[1m"
-  echo -n "#" $@
-  echo -e "\033[0m"
-}
-
-cecho "resize script starting ..."
-
-if [ `id -u` -ne 0 ]; then
-	exec 1>&2; cecho "error: Need root permissions for this script."
- 	exit 1
-fi
-
-if [ -z "$1" ] ; then
-	exec 1>&2; cecho "error: No image specified."
-	exit 1
-fi
-
-SRC_IMG=$1
-DST_IMG=optimized-$1
-
-
-FS_SPACE=40 #MB
-if [ -z "$2" ] ; then
-	FREE_SPACE=$DEFAULT_FREE_SPACE
-elif [[ "$2" =~ ^[0-9]+$ ]] ; then
-	FREE_SPACE=$2
-else
-	exec 1>&2; cecho "error: The 'FREE_SPACE' argument \
-			should be a number."
-	exit 1
-fi
-
-
-cecho "Mounting old image."
-SRC_LOOP=`losetup -f`
-losetup $SRC_LOOP $SRC_IMG
-
-#PARTITION=`kpartx -l $SRC_LOOP | awk '{ print $1 }'`
-#PARTITION=/dev/mapper/$PARTITION
-#kpartx -as $SRC_LOOP
-
-SRC_DIR=`mktemp -d`
-#mount -o loop $PARTITION $SRC_DIR
-mount -o loop $SRC_LOOP $SRC_DIR
-
-USED_SPACE=`(cd $SRC_DIR ; df --total --block-size=M  . | tail -n 1 | awk '{print $3}' | tr -d 'M')`
-
-DST_SIZE=`python -c "print ($USED_SPACE + $FS_SPACE + $FREE_SPACE)"`
-## Use 1GB granularity for image size
-#gb_size="1024.0"
-#DST_SIZE=`python -c "import math; print int(math.ceil($DST_SIZE/$gb_size) * $gb_size)"`
-
-umount $SRC_DIR
-#sleep 1s
-#kpartx -ds $SRC_LOOP
-sleep 1s
-losetup -d $SRC_LOOP
-sleep 1s
-rmdir $SRC_DIR
-
-
-# Create new image
-dd if=/dev/zero of=$DST_IMG bs=1M count=1 seek=$DST_SIZE
-
-#PART_OFFSET_IN_BYTES=`parted -s $SRC_IMG unit B print | awk \
-#	'/Number.*Start.*End/ { getline; print $2 }' | tr -d 'B'`
-#PART_OFFSET_IN_SECTORS=`parted -s $SRC_IMG unit S print | awk \
-#	'/Number.*Start.*End/ { getline; print $2 }' | tr -d 's'`
-
-# Create filesystem on new image and mount it
-#cecho "Writing partition table."
-#parted -s $DST_IMG mklabel msdos
-
-#cecho "Creating primary partition."
-#cyl_total=`parted -s $DST_IMG unit s print | awk \
-#	'{if (NF > 2 && $1 == "Disk") print $0}' | sed \
-#	's/Disk .* \([0-9]\+\)s/\1/'`
-#cyl_partition=`expr $cyl_total - $PART_OFFSET_IN_SECTORS`
-#parted -s $DST_IMG unit s mkpart primary ext3 2048 $cyl_partition
-
-#cecho "Setting boot flag."
-#parted -s $DST_IMG set 1 boot on
-
-DST_LOOP=`losetup -f`
-losetup $DST_LOOP $DST_IMG
-
-#PARTITION=`kpartx -l $DST_LOOP | awk '{ print $1 }'`
-#PARTITION=/dev/mapper/$PARTITION
-#kpartx -as $DST_LOOP
-#DST_LOOP_P=`losetup -f`
-
-#cecho "Creating ext3 filesystem."
-#echo 'y' | mkfs.ext3 $PARTITION
-#cecho "Setting label 'root'."
-#tune2fs $PARTITION -L root
-
-echo 'y' | mkfs.ext3 $DST_LOOP
-tune2fs $DST_LOOP -L root
-
-
-cecho "Mounting new image."
-DST_DIR=`mktemp -d`
-#mount -o loop $PARTITION $DST_DIR
-mount -o loop $DST_LOOP $DST_DIR
-
-cecho "Mounting old image."
-SRC_LOOP=`losetup -f`
-losetup $SRC_LOOP $SRC_IMG
-
-#PARTITION=`kpartx -l $SRC_LOOP | awk '{ print $1 }'`
-#PARTITION=/dev/mapper/$PARTITION
-#kpartx -as $SRC_LOOP
-
-SRC_DIR=`mktemp -d`
-#mount -o loop $PARTITION $SRC_DIR
-mount -o loop $SRC_LOOP $SRC_DIR
-
-# Copy files
-cecho "Copying files."
-( cd $SRC_DIR && tar -cf - . ) | ( cd $DST_DIR && tar -xpf -)
-
-
-#cecho "Running grub-install"
-
-#cat <<DEVICEMAP > $DST_DIR/boot/grub/device.map 
-#(hd0)   $DST_LOOP
-#(hd0,1) $DST_LOOP_P
-#DEVICEMAP
-
-#grub-install --no-floppy --recheck --root-directory=$DST_DIR --modules=part_msdos  $DST_LOOP
-
-cecho "Clean."
-umount $SRC_DIR
-#sleep 1s
-#kpartx -ds $SRC_LOOP
-sleep 1s
-losetup -d $SRC_LOOP
-sleep 1s
-rmdir $SRC_DIR
-
-umount $DST_DIR
-#sleep 1s
-#kpartx -ds $DST_LOOP
-sleep 1s
-losetup -d $DST_LOOP
-sleep 1s
-rmdir $DST_DIR
-
-rm -f $SRC_IMG
-cecho "Done."
-
-EOF
-
-
 trap ":" EXIT
 set +e
 cleanup
-chmod a+x $conpaas_resize
-#/bin/bash $conpaas_resize $FILENAME
-
-#rm -f $conpaas_resize
