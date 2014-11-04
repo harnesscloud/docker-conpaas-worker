@@ -50,8 +50,8 @@ RUN apt-get update && \
 ADD ./setmaxorch.sh /etc/my_init.d/10-setmaxorch
 RUN chmod 0755 /etc/my_init.d/10-setmaxorch
 RUN >> /etc/bash.bashrc echo '\
-export LD_LIBRARY_PATH=/opt/maxeler/maxeleros/lib:$LD_LIBRARY_PATH\n
-export SLIC_CONF="default_engine_resource=192.168.0.10 disable_pcc=true"\n
+export LD_LIBRARY_PATH=/opt/maxeler/maxeleros/lib:$LD_LIBRARY_PATH\n\
+export SLIC_CONF="default_engine_resource=192.168.0.10 disable_pcc=true"\n\
 export PATH=/opt/maxeler/maxeleros/utils:$PATH\n'
 
 # create directory structure
@@ -65,5 +65,22 @@ RUN mkdir -p /etc/cpsmanager/
 RUN mkdir -p /var/tmp/cpsmanager/
 RUN mkdir -p /var/run/cpsmanager/
 RUN mkdir -p /var/cache/cpsmanager/
+
+RUN mkdir -p /etc/my_init.d && \
+    > /etc/my_init.d/20-user_script echo '#!/bin/sh\n\
+ATTEMPTS=10\n\
+TMPFILE=$(mktemp)\n\
+while [ ${ATTEMPTS} -gt 0 ]; do\n\
+  curl -sf http://169.254.169.254/openstack/latest/user_data\\\n\
+    > ${TMPFILE} 2 > /dev/null\n\
+  if [ $? -eq 0 ]; then\n\
+    echo "Successfully retrieved user script from instance metadata"\n\
+    echo "*********************************************************"\n\
+    chmod 700 ${TMPFILE}\n\
+    ${TMPFILE}\n\
+  fi\n\
+done\n\
+rm -f ${TMPFILE}' && \
+    chmod 755 /etc/my_init.d/20-user_script
 
 VOLUME [ "/mnt/data/cccad3/jgfc", "/opt/maxeler" ]
