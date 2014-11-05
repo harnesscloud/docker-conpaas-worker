@@ -40,6 +40,7 @@ RUN apt-get update && \
         python-openssl \
         python-pycurl \
         python-simplejson \
+        python-scipy \
         rrdtool \
         subversion \
         unzip \
