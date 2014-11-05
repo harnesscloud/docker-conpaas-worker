@@ -39,6 +39,7 @@ RUN apt-get update && \
         python-netaddr \
         python-openssl \
         python-pycurl \
+        python-simplejson \
         rrdtool \
         subversion \
         unzip \
