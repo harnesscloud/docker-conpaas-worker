@@ -1,4 +1,4 @@
-FROM marklee77/cloudimage
+FROM phusion/baseimage:latest
 MAINTAINER Gabriel Figueiredo <gabriel.figueiredo@imperial.ac.uk> and Mark Stillwell <mark@stillwell.me>
 
 ENV DEBIAN_FRONTEND noninteractive
@@ -24,7 +24,7 @@ RUN apt-get update && \
 
 #ConPaaS
 RUN apt-get update && \
-    apt-get -y install 
+    apt-get -y install \
         curl \
         ganglia-monitor \
         gmetad \
