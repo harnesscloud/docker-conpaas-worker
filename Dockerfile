@@ -66,24 +66,8 @@ RUN mkdir -p /var/tmp/cpsmanager/
 RUN mkdir -p /var/run/cpsmanager/
 RUN mkdir -p /var/cache/cpsmanager/
 
-RUN mkdir -p /etc/my_init.d && \
-    > /etc/my_init.d/20-user_script echo '#!/bin/sh\n\
-ATTEMPTS=10\n\
-TMPFILE=$(mktemp)\n\
-while [ ${ATTEMPTS} -gt 0 ]; do\n\
-  ATTEMPTS=$((${ATTEMPTS}-1))\n\
-  curl -sf http://169.254.169.254/openstack/latest/user_data\\\n\
-    > ${TMPFILE} 2> /dev/null\n\
-  if [ $? -eq 0 ]; then\n\
-    echo "Successfully retrieved user script from instance metadata"\n\
-    echo "*********************************************************"\n\
-    chmod 700 ${TMPFILE}\n\
-    ${TMPFILE}\n\
-    break\n\
-  fi\n\
-done\n\
-rm -f ${TMPFILE}' && \
-    chmod 755 /etc/my_init.d/20-user_script
+ADD 998-ec2 /etc/my_init.d/20-conpaas-ec2
+RUN chmod 755 /etc/my_init.d/20-conpaas-ec2
 
 VOLUME [ "/mnt/data/cccad3/jgfc", "/opt/maxeler" ]
 
