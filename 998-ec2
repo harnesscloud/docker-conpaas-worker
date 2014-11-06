@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 ### BEGIN INIT INFO
 # Provides:       ec2-get-credentials
 # Required-Start: $network

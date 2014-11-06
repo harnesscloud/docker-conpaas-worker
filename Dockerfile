@@ -1,4 +1,4 @@
-FROM debootstrap/squeeze
+FROM debian:squeeze
 
 MAINTAINER Mark Stillwell <mark@stillwell.me>
 
