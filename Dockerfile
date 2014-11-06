@@ -33,14 +33,6 @@ RUN apt-get update && \
         logtail \
         ntp \
         openssh-server \
-        python \
-        python-cheetah \
-        python-m2crypto \
-        python-netaddr \
-        python-openssl \
-        python-pycurl \
-        python-simplejson \
-        python-scipy \
         rrdtool \
         subversion \
         unzip \
