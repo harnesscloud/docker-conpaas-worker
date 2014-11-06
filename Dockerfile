@@ -1,7 +1,81 @@
-FROM phusion/baseimage:latest
-MAINTAINER Gabriel Figueiredo <gabriel.figueiredo@imperial.ac.uk> and Mark Stillwell <mark@stillwell.me>
+FROM debian:squeeze
+MAINTAINER Mark Stillwell <mark@stillwell.me>
 
 ENV DEBIAN_FRONTEND noninteractive
+
+RUN echo "root:contrail" | chpasswd
+RUN sed --in-place 's/main/main contrib non-free/' /etc/apt/sources.list
+
+# pre-accept sun java6 licence
+RUN echo "debconf shared/accepted-sun-dlj-v1-1 boolean true" | \
+    debconf-set-selections
+
+# ipop repository
+RUN echo "deb http://www.grid-appliance.org/files/packages/deb/ stable contrib"\
+        >> /etc/apt/sources.list
+RUN wget -O - http://www.grid-appliance.org/files/packages/deb/repo.key | \
+        apt-key add -
+
+# add dotdeb repo for php fpm
+RUN echo "deb http://packages.dotdeb.org $DEBIAN_DIST all" \
+    >> /etc/apt/sources.list
+RUN wget -O - http://www.dotdeb.org/dotdeb.gpg 2>/dev/null | apt-key add -
+
+#ConPaaS
+RUN apt-get update && \
+    apt-get -y --no-install-recommends install \
+        curl \
+        g++ \
+        ganglia-monitor \
+        gfortran \
+        git \
+        gmetad \
+        ipop \
+        less \
+        libatlas-base-dev \
+        libatlas3gf-base \
+        libxslt1-dev \
+        logtail \
+        memcached \
+        nginx \
+        ntp \
+        openssh-server \
+        php5-adodb \
+        php5-curl \
+        php5-fpm \
+        php5-gd \
+        php5-mcrypt \
+        php5-memcache \
+        php5-mysql \
+        php5-odbc \
+        php5-pgsql \
+        php5-sqlite \
+        php5-sybase \
+        php5-xmlrpc \
+        php5-xsl \
+        python \
+        python-dev \
+        python-cheetah \
+        python-m2crypto \
+        python-netaddr 
+        python-openssl \
+        python-pycurl \
+        python-scipy \
+        python-setuptools \
+        python-simplejson \
+        rrdtool \
+        subversion \
+        tomcat6-user \
+        unzip \
+        wget \
+        yaws && \
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/*
+
+RUN easy_install numpy && \
+    easy_install -U numpy && \
+    easy_install pandas && \
+    easy_install patsy && \
+    easy_install statsmodels
 
 # MaxelerOS 
 RUN apt-get update && \
@@ -22,23 +96,6 @@ RUN apt-get update && \
 #    apt-get -y install xtreemfs-client && \
 #    rm -rf /var/lib/apt/lists/* /var/cache/apt/*
 
-#ConPaaS
-RUN apt-get update && \
-    apt-get -y install \
-        curl \
-        ganglia-monitor \
-        gmetad \
-        less \
-        libxslt1-dev \
-        logtail \
-        ntp \
-        openssh-server \
-        rrdtool \
-        subversion \
-        unzip \
-        wget \
-        yaws && \
-    rm -rf /var/lib/apt/lists/* /var/cache/apt/*
 
 # StartUp
 ADD ./setmaxorch.sh /etc/my_init.d/10-setmaxorch
