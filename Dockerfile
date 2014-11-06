@@ -71,8 +71,8 @@ RUN apt-get update && \
 
 
 # StartUp
-ADD ./setmaxorch.sh /etc/service/setmaxorch/run
-RUN chmod 0755 /etc/service/setmaxorch/run
+ADD ./setmaxorch.sh /usr/local/bin/setmaxorch.sh
+RUN chmod 0755 /usr/local/bin/setmaxorch.sh
 RUN >> /etc/bash.bashrc echo '\
 export LD_LIBRARY_PATH=/opt/maxeler/maxeleros/lib:$LD_LIBRARY_PATH\n\
 export SLIC_CONF="default_engine_resource=192.168.0.10 disable_pcc=true"\n\
@@ -90,8 +90,8 @@ RUN mkdir -p /var/tmp/cpsmanager/
 RUN mkdir -p /var/run/cpsmanager/
 RUN mkdir -p /var/cache/cpsmanager/
 
-ADD 998-ec2 /etc/service/conpaas-ec2/run
-RUN chmod 0755 /etc/service/conpaas-ec2/run
+ADD 998-ec2 /usr/local/bin/conpaas-ec2
+RUN chmod 0755 /usr/local/bin/conpaas-ec2
 
 RUN mkdir -p /etc/service/sshd && \
     echo -e '#!/bin/sh\nexec /usr/bin/sshd -D' > /etc/service/sshd/run && \
@@ -101,5 +101,7 @@ EXPOSE 22
 
 VOLUME [ "/mnt/data/cccad3/jgfc", "/opt/maxeler" ]
 
-CMD [ "/usr/sbin/runsvdir-start" ]
+CMD /usr/local/bin/setmaxorch.sh && \
+    /usr/local/bin/conpaas-ec2 && \
+    /usr/sbin/runsvdir-start
 
