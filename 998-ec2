@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash 
 ### BEGIN INIT INFO
 # Provides:       ec2-get-credentials
 # Required-Start: $network
@@ -16,7 +16,8 @@
 #
 
 prog=$(basename $0)
-logger="logger -t $prog"
+#logger="logger -t $prog"
+logger="echo"
 
 public_key_url=http://169.254.169.254/1.0/meta-data/public-keys/0/openssh-key
 username='root'
