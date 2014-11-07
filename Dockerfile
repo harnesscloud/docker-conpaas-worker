@@ -103,5 +103,8 @@ VOLUME [ "/mnt/data/cccad3/jgfc", "/opt/maxeler" ]
 
 RUN echo "root:contrail" | chpasswd
 
-CMD /usr/sbin/runsvdir-start
+ADD start.sh /usr/local/bin/start.sh
+RUN chmod 0755 /usr/local/bin/start.sh
+
+CMD /usr/local/bin/start.sh
 
