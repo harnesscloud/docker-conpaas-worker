@@ -4,7 +4,6 @@ MAINTAINER Mark Stillwell <mark@stillwell.me>
 
 ENV DEBIAN_FRONTEND noninteractive
 
-RUN echo "root:contrail" | chpasswd
 RUN sed --in-place 's/main/main contrib non-free/' /etc/apt/sources.list
 
 RUN apt-get update && \
@@ -94,14 +93,14 @@ ADD 998-ec2 /usr/local/bin/conpaas-ec2
 RUN chmod 0755 /usr/local/bin/conpaas-ec2
 
 RUN mkdir -p /etc/service/sshd && \
-    echo -e '#!/bin/sh\nexec /usr/bin/sshd -D' > /etc/service/sshd/run && \
+    echo '#!/bin/sh\nexec /usr/bin/sshd -D' > /etc/service/sshd/run && \
     chmod 0755 /etc/service/sshd/run
 
 EXPOSE 22
 
 VOLUME [ "/mnt/data/cccad3/jgfc", "/opt/maxeler" ]
 
-CMD /usr/local/bin/setmaxorch.sh && \
-    /usr/local/bin/conpaas-ec2 && \
-    /usr/sbin/runsvdir-start
+RUN echo "root:contrail" | chpasswd
+
+CMD /usr/sbin/runsvdir-start
 
