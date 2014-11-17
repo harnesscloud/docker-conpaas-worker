@@ -59,34 +59,3 @@ ADD conpaas-worker.sh /etc/my_init.d/10-conpaas-worker
 RUN chmod 0755 /etc/my_init.d/10-conpaas-worker
 
 EXPOSE 80 443
-
-# MaxelerOS 
-#RUN apt-get update && \
-#    apt-get -y install \
-#        infiniband-diags \
-#        iptables \
-#        libgomp1 \
-#        libmlx4-1 \
-#        nano \
-#        net-tools \
-#        wget && \
-#    rm -rf /var/lib/apt/lists/* /var/cache/apt/*
-
-#VOLUME [ "/mnt/data/cccad3/jgfc", "/opt/maxeler" ]
-
-#XtreemFS
-#RUN wget -q http://download.opensuse.org/repositories/home:/xtreemfs/xUbuntu_14.04/Release.key -O - | sudo apt-key add -
-#RUN apt-add-repository "deb http://download.opensuse.org/repositories/home:/xtreemfs/xUbuntu_14.04 ./"
-#RUN apt-get update && \
-#    apt-get -y install xtreemfs-client && \
-#    rm -rf /var/lib/apt/lists/* /var/cache/apt/*
-
-
-# StartUp
-#ADD ./setmaxorch.sh /usr/local/bin/setmaxorch.sh
-#RUN chmod 0755 /usr/local/bin/setmaxorch.sh
-#RUN >> /etc/bash.bashrc echo '\
-#export LD_LIBRARY_PATH=/opt/maxeler/maxeleros/lib:$LD_LIBRARY_PATH\n\
-#export SLIC_CONF="default_engine_resource=192.168.0.10 disable_pcc=true"\n\
-#export PATH=/opt/maxeler/maxeleros/utils:$PATH\n'
-
