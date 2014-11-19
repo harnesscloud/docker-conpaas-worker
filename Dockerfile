@@ -39,7 +39,7 @@ RUN apt-get update && \
         yaws && \
     rm -rf /var/lib/apt/lists/* /var/cache/apt/*
 
-RUN easy_install -U pyopenssl && \
+RUN easy_install -U git+https://github.com/marklee77/pyopenssl@socketserver-fix#egg=pyopenssl && \
     easy_install numpy && \
     easy_install -U numpy && \
     easy_install pandas && \
