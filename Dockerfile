@@ -1,4 +1,4 @@
-FROM marklee77/debian-cloudimage:latest
+FROM phusion/baseimage:latest
 MAINTAINER Mark Stillwell <mark@stillwell.me>
 
 RUN echo "root:contrail" | chpasswd
