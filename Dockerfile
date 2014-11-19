@@ -26,7 +26,6 @@ RUN apt-get update && \
         python-httplib2 \
         python-m2crypto \
         python-netaddr \
-        python-openssl \
         python-pip \
         python-pycurl \
         python-scipy \
