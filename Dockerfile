@@ -7,6 +7,7 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && \
     apt-get -y install \
         bzr \
+        curl \
         g++ \
         ganglia-monitor \
         gfortran \
@@ -27,7 +28,6 @@ RUN apt-get update && \
         python-httplib2 \
         python-m2crypto \
         python-netaddr \
-        python-pip \
         python-pycurl \
         python-scipy \
         python-setuptools \
@@ -46,7 +46,9 @@ RUN easy_install numpy && \
     easy_install patsy && \
     easy_install statsmodels
 
-RUN easy_install -U bzr+lp:~remyroy/pyopenssl/shutdown-fix#egg=pyopenssl
+RUN curl -s https://bootstrap.pypa.io/get-pip.py | python -
+
+RUN pip install bzr+lp:~remyroy/pyopenssl/shutdown-fix#egg=pyopenssl
 
 # create directory structure
 RUN mkdir -p \
