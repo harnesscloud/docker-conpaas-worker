@@ -14,6 +14,8 @@ RUN apt-get update && \
         less \
         libatlas-base-dev \
         libatlas3gf-base \
+        libffi-dev \
+        libssl-dev \
         libxslt1-dev \
         logtail \
         memcached \
@@ -38,7 +40,8 @@ RUN apt-get update && \
         yaws && \
     rm -rf /var/lib/apt/lists/* /var/cache/apt/*
 
-RUN easy_install numpy && \
+RUN easy_install pyopenssl && \
+    easy_install numpy && \
     easy_install -U numpy && \
     easy_install pandas && \
     easy_install patsy && \
