@@ -1,5 +1,4 @@
 #!/bin/bash 
-prog=$(basename $0)
 instance_data_url="http://169.254.169.254/2008-02-01"
 
 # Retrieve the instance user-data and run it if it looks like a script
