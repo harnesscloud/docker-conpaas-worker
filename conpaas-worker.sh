@@ -1,9 +1,17 @@
 #!/bin/bash 
-instance_data_url="http://169.254.169.254/2008-02-01"
 
 # Retrieve the instance user-data and run it if it looks like a script
+user_data_url=http://169.254.169.254/openstack/2012-08-10/user_data
 user_data_file=$(tempfile --prefix ec2 --suffix .user-data --mode 700)
-wget -qO $user_data_file $instance_data_url/user-data 2>&1
+attempts=10
+while [ $attempts -gt 0 ]; do
+  attempts=$((${attempts}-1))
+  curl -sf $user_data_url > $user_data_file 2>/dev/null
+  if [ $? -eq 0 ]; then
+    break
+  fi
+  sleep 1
+done
 
 if [ $(file -b --mime-type $user_data_file) = 'application/x-gzip' ]; then
 	echo "Uncompressing gzip'd user-data"
