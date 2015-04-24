@@ -44,7 +44,8 @@ RUN easy_install numpy && \
     easy_install -U numpy && \
     easy_install pandas && \
     easy_install patsy && \
-    easy_install statsmodels
+    easy_install statsmodels && \
+    easy_install pyopenssl
 
 #RUN curl -s https://bootstrap.pypa.io/get-pip.py | python -
 #RUN pip install bzr+lp:~remyroy/pyopenssl/shutdown-fix#egg=pyopenssl
