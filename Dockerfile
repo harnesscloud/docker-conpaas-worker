@@ -44,11 +44,10 @@ RUN easy_install numpy && \
     easy_install -U numpy && \
     easy_install pandas && \
     easy_install patsy && \
-    easy_install statsmodels && \
-    easy_install pyopenssl
+    easy_install statsmodels
 
-#RUN curl -s https://bootstrap.pypa.io/get-pip.py | python -
-#RUN pip install bzr+lp:~remyroy/pyopenssl/shutdown-fix#egg=pyopenssl
+RUN curl -s https://bootstrap.pypa.io/get-pip.py | python -
+RUN pip install git+https://github.com/harnesscloud/remyroy-pyopenssl-shutdown-fix#egg=pyopenssl
 
 # create directory structure
 RUN mkdir -p \
