@@ -3,10 +3,10 @@
 # Retrieve the instance user-data and run it if it looks like a script
 user_data_url=http://169.254.169.254/openstack/2012-08-10/user_data
 user_data_file=$(tempfile --prefix ec2 --suffix .user-data --mode 700)
-attempts=10
+attempts=12
 while [ $attempts -gt 0 ]; do
   attempts=$((${attempts}-1))
-  curl -sf $user_data_url > $user_data_file 2>/dev/null
+  curl -m 10 -sf $user_data_url > $user_data_file 2>/dev/null
   if [ $? -eq 0 ]; then
     break
   fi
