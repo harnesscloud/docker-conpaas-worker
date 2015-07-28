@@ -1,4 +1,4 @@
-FROM phusion/baseimage:latest
+FROM harnesscloud/baseimage-cloud:latest
 MAINTAINER Mark Stillwell <mark@stillwell.me>
 
 RUN echo "root:contrail" | chpasswd
