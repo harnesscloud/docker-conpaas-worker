@@ -40,6 +40,13 @@ RUN apt-get update && \
         yaws && \
     rm -rf /var/lib/apt/lists/* /var/cache/apt/*
 
+# install xtreemfs client
+RUN echo "deb http://download.opensuse.org/repositories/home:/xtreemfs/xUbuntu_14.04 ./" >> /etc/apt/sources.list
+RUN wget -q http://download.opensuse.org/repositories/home:/xtreemfs/xUbuntu_14.04/Release.key -O - | sudo apt-key add -
+RUN apt-get update && \
+    apt-get -y install xtreemfs-client && \
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/*
+
 RUN easy_install numpy && \
     easy_install -U numpy && \
     easy_install pandas && \
