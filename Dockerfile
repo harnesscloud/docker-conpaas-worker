@@ -70,4 +70,7 @@ RUN mkdir -p \
 ADD conpaas-worker.sh /etc/my_init.d/10-conpaas-worker
 RUN chmod 0755 /etc/my_init.d/10-conpaas-worker
 
+ADD hinst /usr/local/bin/hinst
+RUN chmod 0755 /usr/local/bin/hinst
+
 EXPOSE 80 443

@@ -1,0 +1,68 @@
+#!/usr/bin/env python
+
+import argparse, json, sys
+
+parser = argparse.ArgumentParser(description="Extract HARNESS resource instances")
+parser.add_argument('-f', '--file', default="/var/cache/cpsagent/harness/instances.json")
+parser.add_argument('-n', '--num', action="store_true", help="get number of instances")
+parser.add_argument('-t', '--type', help="type of instances", default="")
+parser.add_argument('-i', '--index', type=int, default="-1", help="instance index (relative to type)")
+parser.add_argument('-a', '--addr',  action="store_true", help="get instance address")
+parser.add_argument('-c', metavar="attrib", default="",  help="get instance attribute")
+parser.add_argument('-s', default="\n", help="list separator")
+parser.add_argument('-g', '--group', help="group id", default="")
+
+args = parser.parse_args()
+
+# first lets load json file
+
+with open(args.file) as data_file:    
+    data = json.load(data_file)["Instances"]
+
+if args.num:
+   num = 0
+   for inst in data:
+      if (args.group == "") or (inst["GroupID"] == args.group):
+         if (args.type == "") or (inst["Type"] == args.type):
+            num = num + 1
+   print num
+elif args.addr:
+   i = 0
+   first = True
+   for inst in data:
+      if (args.group == "") or (inst["GroupID"] == args.group):
+         if (args.type == "") or (inst["Type"] == args.type):
+            if args.index == -1:
+               if first:
+                  sys.stdout.write(inst["Address"])
+                  first = False
+               else:
+                  sys.stdout.write(args.s + inst["Address"])
+            elif i == args.index:
+               print inst["Address"]
+               sys.exit(0)
+            i = i + 1
+   print
+elif args.c != "":
+   i = 0
+   first = True
+   for inst in data:
+      if (args.group == "") or (inst["GroupID"] == args.group):
+         if (args.type == "") or (inst["Type"] == args.type):
+            if args.index == -1:
+               if first:
+                  sys.stdout.write(str(inst["Attributes"][args.c]))
+                  first = False
+               else:
+                  sys.stdout.write(args.s + str(inst["Attributes"][args.c]))
+            elif i == args.index:
+               print inst["Attributes"][args.c]
+               sys.exit(0)
+            i = i + 1
+   print        
+else:
+   print "missing either -n (number of instances), -a (address), or -c (attribute)"         
+
+   
+
+
