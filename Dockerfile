@@ -13,10 +13,13 @@ RUN apt-get update && \
         gfortran \
         git \
         gmetad \
+        infiniband-diags \
         less \
         libatlas-base-dev \
         libatlas3gf-base \
         libffi-dev \
+        libgomp1
+        libmlx4-1 \
         libssl-dev \
         libxslt1-dev \
         logtail \
