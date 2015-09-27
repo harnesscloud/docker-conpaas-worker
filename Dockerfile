@@ -18,7 +18,7 @@ RUN apt-get update && \
         libatlas-base-dev \
         libatlas3gf-base \
         libffi-dev \
-        libgomp1
+        libgomp1 \
         libmlx4-1 \
         libssl-dev \
         libxslt1-dev \
