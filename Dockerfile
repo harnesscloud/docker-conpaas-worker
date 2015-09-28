@@ -29,6 +29,7 @@ RUN apt-get update && \
         nginx \
         openjdk-6-jdk \
         p7zip \
+        pexpect \
         python \
         python-dev \
         python-cheetah \
