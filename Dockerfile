@@ -29,17 +29,18 @@ RUN apt-get update && \
         nginx \
         openjdk-6-jdk \
         p7zip \
-        pexpect \
         python \
         python-dev \
         python-cheetah \
         python-httplib2 \
         python-m2crypto \
         python-netaddr \
+        python-pexpect \
         python-pycurl \
         python-scipy \
         python-setuptools \
         python-simplejson \
+        python-sklearn \
         rrdtool \
         subversion \
         tcpdump \
