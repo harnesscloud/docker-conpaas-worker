@@ -76,4 +76,7 @@ RUN chmod 0755 /etc/my_init.d/10-conpaas-worker
 ADD hinst /usr/local/bin/hinst
 RUN chmod 0755 /usr/local/bin/hinst
 
+ADD maxeleros-mpcx_2014.1a.deb /tmp/maxeleros-mpcx.deb
+RUN dpkg -i /tmp/maxeleros-mpcx.deb
+
 EXPOSE 80 443
