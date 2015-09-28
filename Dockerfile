@@ -13,7 +13,9 @@ RUN apt-get update && \
         gfortran \
         git \
         gmetad \
+        htop \
         infiniband-diags \
+        iperf \
         less \
         libatlas-base-dev \
         libatlas3gf-base \
@@ -25,6 +27,8 @@ RUN apt-get update && \
         logtail \
         memcached \
         nginx \
+        openjdk-6-jdk \
+        p7zip \
         python \
         python-dev \
         python-cheetah \
@@ -37,6 +41,7 @@ RUN apt-get update && \
         python-simplejson \
         rrdtool \
         subversion \
+        tcpdump \
         tomcat6-user \
         unzip \
         wget \
