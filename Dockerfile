@@ -83,4 +83,12 @@ RUN chmod 0755 /etc/my_init.d/10-conpaas-worker
 ADD hinst /usr/local/bin/hinst
 RUN chmod 0755 /usr/local/bin/hinst
 
+# add insecure private key, for any future development we should generate a key
+# and push it through nova once irm-nova implements this functionality
+RUN mkdir -m 0700 /root/.ssh
+ADD harness_insecure-id_rsa /root/.ssh/id_rsa
+RUN chmod 0600 /root/.ssh/id_rsa
+ADD harness_insecure-id_rsa.pub /root/.ssh/authorized_keys
+RUN chmod 0644 /root/.ssh/authorized_keys
+
 EXPOSE 80 443
