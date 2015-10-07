@@ -86,6 +86,7 @@ RUN chmod 0755 /usr/local/bin/hinst
 
 ADD maxeleros-mpcx_2014.1a.deb /tmp/maxeleros-mpcx.deb
 RUN dpkg -i /tmp/maxeleros-mpcx.deb
+RUN echo 'PATH=/opt/maxeler/maxeleros/utils:$PATH' >> /root/.bashrc
 
 # add insecure private key, for any future development we should generate a key
 # and push it through nova once irm-nova implements this functionality
