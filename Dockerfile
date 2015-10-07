@@ -13,7 +13,10 @@ RUN apt-get update && \
         gfortran \
         git \
         gmetad \
+        htop \
         infiniband-diags \
+        iperf \
+        iptables \
         less \
         libatlas-base-dev \
         libatlas3gf-base \
@@ -25,18 +28,23 @@ RUN apt-get update && \
         logtail \
         memcached \
         nginx \
+        openjdk-6-jdk \
+        p7zip \
         python \
         python-dev \
         python-cheetah \
         python-httplib2 \
         python-m2crypto \
         python-netaddr \
+        python-pexpect \
         python-pycurl \
         python-scipy \
         python-setuptools \
         python-simplejson \
+        python-sklearn \
         rrdtool \
         subversion \
+        tcpdump \
         tomcat6-user \
         unzip \
         wget \
@@ -78,5 +86,13 @@ RUN chmod 0755 /usr/local/bin/hinst
 
 ADD maxeleros-mpcx_2014.1a.deb /tmp/maxeleros-mpcx.deb
 RUN dpkg -i /tmp/maxeleros-mpcx.deb
+
+# add insecure private key, for any future development we should generate a key
+# and push it through nova once irm-nova implements this functionality
+RUN mkdir -p -m 0700 /root/.ssh
+ADD harness_insecure-id_rsa /root/.ssh/id_rsa
+RUN chmod 0600 /root/.ssh/id_rsa
+ADD harness_insecure-id_rsa.pub /root/.ssh/authorized_keys
+RUN chmod 0644 /root/.ssh/authorized_keys
 
 EXPOSE 80 443
