@@ -16,6 +16,7 @@ RUN apt-get update && \
         htop \
         infiniband-diags \
         iperf \
+        iptables \
         less \
         libatlas-base-dev \
         libatlas3gf-base \
