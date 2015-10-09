@@ -20,15 +20,13 @@ if [ $(file -b --mime-type $user_data_file) = 'application/x-gzip' ]; then
 fi
 
 # set up environment for maxeler orchestrator
-if [ -d /dev/infiniband ]; then
-    echo 1 > /proc/sys/net/ipv4/ip_forward
-    ip link add ib0 type dummy
-    ip address add 192.168.0.0/24 dev ib0
-    ip link set ib0 up
-    ip route del 192.168.0.0/24 dev ib0
-    ip route add 192.168.0.0/24 via 172.17.42.1 dev eth0
-    iptables -t nat -I POSTROUTING -o eth0 -j MASQUERADE
-fi
+echo 1 > /proc/sys/net/ipv4/ip_forward
+ip link add ib0 type dummy
+ip address add 192.168.0.0/24 dev ib0
+ip link set ib0 up
+ip route del 192.168.0.0/24 dev ib0
+ip route add 192.168.0.0/24 via 172.17.42.1 dev eth0
+iptables -t nat -I POSTROUTING -o eth0 -j MASQUERADE
 
 if [ ! -s $user_data_file ]; then
 	echo "No user-data available"
