@@ -23,10 +23,10 @@ fi
 if [ -d /dev/infiniband ]; then
     echo 1 > /proc/sys/net/ipv4/ip_forward
     ip link add ib0 type dummy
-    ip address add 192.168.0.0/25 broadcast 192.168.0.127 dev ib0
+    ip address add 192.168.0.0/24 dev ib0
     ip link set ib0 up
-    route add 192.168.0.129 gw 172.17.42.1
-    route add 192.168.0.1 gw 172.17.42.1
+    ip route del 192.168.0.0/24 dev ib0
+    ip route add 192.168.0.0/24 via 172.17.42.1 dev eth0
     iptables -t nat -I POSTROUTING -o eth0 -j MASQUERADE
 fi
 
