@@ -14,6 +14,7 @@ RUN apt-get update && \
         git \
         gmetad \
         htop \
+        imagemagick \
         infiniband-diags \
         iperf \
         iptables \
@@ -48,7 +49,8 @@ RUN apt-get update && \
         tomcat6-user \
         unzip \
         wget \
-        yaws && \
+        yaws \
+        Xvfb && \
     rm -rf /var/lib/apt/lists/* /var/cache/apt/*
 
 # install xtreemfs client
@@ -66,6 +68,8 @@ RUN easy_install numpy && \
 
 RUN curl -s https://bootstrap.pypa.io/get-pip.py | python -
 RUN pip install git+https://github.com/harnesscloud/remyroy-pyopenssl-shutdown-fix#egg=pyopenssl
+
+RUN pip install Flask
 
 # create directory structure
 RUN mkdir -p \
