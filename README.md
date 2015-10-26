@@ -1,6 +1,8 @@
 HARNESS CONTAINER IMAGE
 =======================
 
+[![DOI](https://zenodo.org/badge/7696/harnesscloud/docker-conpaas-worker.svg)](https://zenodo.org/badge/latestdoi/7696/harnesscloud/docker-conpaas-worker)
+
 ### BUILD
 
     docker build -t harness-container .
